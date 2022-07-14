@@ -21,7 +21,7 @@
   <parent>
     <groupId>org.mybatis</groupId>
     <artifactId>mybatis-parent</artifactId>
-    <version>32-SNAPSHOT</version>
+    <version>32</version>
   </parent>
 
   <artifactId>mybatis</artifactId>
@@ -332,6 +332,7 @@
               <exclude>org/apache/ibatis/javassist/**/*.class</exclude>
             </excludes>
           </instrumentation>
+          <check/>
         </configuration>
         <executions>
           <execution>
@@ -367,35 +368,35 @@
         </excludes>
       </testResource>
     </testResources>
-    <pluginManagement>
-        <plugins>
-            <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
-            <plugin>
-                <groupId>org.eclipse.m2e</groupId>
-                <artifactId>lifecycle-mapping</artifactId>
-                <version>1.0.0</version>
-                <configuration>
-                    <lifecycleMappingMetadata>
-                        <pluginExecutions>
-                            <pluginExecution>
-                                <pluginExecutionFilter>
-                                    <groupId>org.sonatype.plugins</groupId>
-                                    <artifactId>jarjar-maven-plugin</artifactId>
-                                    <versionRange>[1.9,)</versionRange>
-                                    <goals>
-                                        <goal>jarjar</goal>
-                                    </goals>
-                                </pluginExecutionFilter>
-                                <action>
-                                    <ignore></ignore>
-                                </action>
-                            </pluginExecution>
-                        </pluginExecutions>
-                    </lifecycleMappingMetadata>
-                </configuration>
-            </plugin>
-        </plugins>
-    </pluginManagement>
+    <!--<pluginManagement>-->
+    <!--    <plugins>-->
+    <!--        &lt;!&ndash;This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.&ndash;&gt;-->
+    <!--        <plugin>-->
+    <!--            <groupId>org.eclipse.m2e</groupId>-->
+    <!--            <artifactId>lifecycle-mapping</artifactId>-->
+    <!--            <version>1.0.0</version>-->
+    <!--            <configuration>-->
+    <!--                <lifecycleMappingMetadata>-->
+    <!--                    <pluginExecutions>-->
+    <!--                        <pluginExecution>-->
+    <!--                            <pluginExecutionFilter>-->
+    <!--                                <groupId>org.sonatype.plugins</groupId>-->
+    <!--                                <artifactId>jarjar-maven-plugin</artifactId>-->
+    <!--                                <versionRange>[1.9,)</versionRange>-->
+    <!--                                <goals>-->
+    <!--                                    <goal>jarjar</goal>-->
+    <!--                                </goals>-->
+    <!--                            </pluginExecutionFilter>-->
+    <!--                            <action>-->
+    <!--                                <ignore></ignore>-->
+    <!--                            </action>-->
+    <!--                        </pluginExecution>-->
+    <!--                    </pluginExecutions>-->
+    <!--                </lifecycleMappingMetadata>-->
+    <!--            </configuration>-->
+    <!--        </plugin>-->
+    <!--    </plugins>-->
+    <!--</pluginManagement>-->
   </build>
 
 </project>
