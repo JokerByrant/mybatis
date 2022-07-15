@@ -15,13 +15,6 @@
  */
 package org.apache.ibatis.session.defaults;
 
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.binding.BindingException;
 import org.apache.ibatis.exceptions.ExceptionFactory;
 import org.apache.ibatis.exceptions.TooManyResultsException;
@@ -35,6 +28,13 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.session.ResultHandler;
 import org.apache.ibatis.session.RowBounds;
 import org.apache.ibatis.session.SqlSession;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Clinton Begin
@@ -53,7 +53,7 @@ public class DefaultSqlSession implements SqlSession {
    */
   private boolean autoCommit;
   private boolean dirty;
-  
+
   public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
     this.configuration = configuration;
     this.executor = executor;
@@ -276,6 +276,8 @@ public class DefaultSqlSession implements SqlSession {
     return configuration;
   }
 
+  // 写下调用流程 Configuration -> MapperRegistry -> MapperProxyFactory
+  // 最终在 MapperProxyFactory 中通过 JDK 的动态代理获取到 Mapper 接口
   @Override
   public <T> T getMapper(Class<T> type) {
     //最后会去调用MapperRegistry.getMapper
@@ -313,7 +315,7 @@ public class DefaultSqlSession implements SqlSession {
         //参数若是List型，做list标记
         map.put("list", object);
       }
-      return map;      
+      return map;
     } else if (object != null && object.getClass().isArray()) {
       //参数若是数组型，，做array标记
       StrictMap<Object> map = new StrictMap<Object>();

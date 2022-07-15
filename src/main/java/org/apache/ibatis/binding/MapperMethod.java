@@ -48,7 +48,8 @@ public class MapperMethod {
     this.method = new MethodSignature(config, method);
   }
 
-  //执行
+  // 执行，流程如下：
+  // 先判断 sql 类型(CRUD), 之后调用 sqlSession 中对应的方法, 拿到返回值, 再根据方法中配置的属性进行处理
   public Object execute(SqlSession sqlSession, Object[] args) {
     Object result;
     //可以看到执行时就是4种情况，insert|update|delete|select，分别调用SqlSession的4大类方法
@@ -81,7 +82,7 @@ public class MapperMethod {
       throw new BindingException("Unknown execution method for: " + command.getName());
     }
     if (result == null && method.getReturnType().isPrimitive() && !method.returnsVoid()) {
-      throw new BindingException("Mapper method '" + command.getName() 
+      throw new BindingException("Mapper method '" + command.getName()
           + " attempted to return null from a method with a primitive return type (" + method.getReturnType() + ").");
     }
     return result;
@@ -111,8 +112,8 @@ public class MapperMethod {
   private void executeWithResultHandler(SqlSession sqlSession, Object[] args) {
     MappedStatement ms = sqlSession.getConfiguration().getMappedStatement(command.getName());
     if (void.class.equals(ms.getResultMaps().get(0).getType())) {
-      throw new BindingException("method " + command.getName() 
-          + " needs either a @ResultMap annotation, a @ResultType annotation," 
+      throw new BindingException("method " + command.getName()
+          + " needs either a @ResultMap annotation, a @ResultType annotation,"
           + " or a resultType attribute in XML so a ResultHandler can be used as a parameter.");
     }
     Object param = method.convertArgsToSqlCommandParam(args);
@@ -138,6 +139,7 @@ public class MapperMethod {
     // issue #510 Collections & arrays support
     if (!method.getReturnType().isAssignableFrom(result.getClass())) {
       if (method.getReturnType().isArray()) {
+        // 返回结果是数组对象，将查询出的结果转换为数组
         return convertToArray(result);
       } else {
         return convertToDeclaredCollection(sqlSession.getConfiguration(), result);
@@ -238,6 +240,7 @@ public class MapperMethod {
     private final boolean hasNamedParameters;
 
     public MethodSignature(Configuration configuration, Method method) {
+      // 将方法中的一些信息配置进来，之后执行 executor() 方法时需要用到
       this.returnType = method.getReturnType();
       this.returnsVoid = void.class.equals(this.returnType);
       this.returnsMany = (configuration.getObjectFactory().isCollection(this.returnType) || this.returnType.isArray());
@@ -271,9 +274,9 @@ public class MapperMethod {
           final String genericParamName = "param" + String.valueOf(i + 1);
           if (!param.containsKey(genericParamName)) {
             //2.再加一个#{param1},#{param2}...参数
-            //你可以传递多个参数给一个映射器方法。如果你这样做了, 
+            //你可以传递多个参数给一个映射器方法。如果你这样做了,
             //默认情况下它们将会以它们在参数列表中的位置来命名,比如:#{param1},#{param2}等。
-            //如果你想改变参数的名称(只在多参数情况下) ,那么你可以在参数上使用@Param(“paramName”)注解。 
+            //如果你想改变参数的名称(只在多参数情况下) ,那么你可以在参数上使用@Param(“paramName”)注解。
             param.put(genericParamName, args[entry.getKey()]);
           }
           i++;
