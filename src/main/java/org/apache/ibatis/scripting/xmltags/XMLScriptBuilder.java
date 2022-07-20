@@ -15,11 +15,6 @@
  */
 package org.apache.ibatis.scripting.xmltags;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.ibatis.builder.BaseBuilder;
 import org.apache.ibatis.builder.BuilderException;
 import org.apache.ibatis.mapping.SqlSource;
@@ -28,6 +23,11 @@ import org.apache.ibatis.scripting.defaults.RawSqlSource;
 import org.apache.ibatis.session.Configuration;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author Clinton Begin
@@ -52,6 +52,7 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   public SqlSource parseScriptNode() {
+    // 解析动态Sql中的各个标签，解析出来的标签放入SqlNode中，返回SqlNode集合
     List<SqlNode> contents = parseDynamicTags(context);
     MixedSqlNode rootSqlNode = new MixedSqlNode(contents);
     SqlSource sqlSource = null;
@@ -63,6 +64,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     return sqlSource;
   }
 
+  // 解析Sql动态标签
   List<SqlNode> parseDynamicTags(XNode node) {
     List<SqlNode> contents = new ArrayList<SqlNode>();
     NodeList children = node.getNode().getChildNodes();
@@ -79,10 +81,12 @@ public class XMLScriptBuilder extends BaseBuilder {
         }
       } else if (child.getNode().getNodeType() == Node.ELEMENT_NODE) { // issue #628
         String nodeName = child.getNode().getNodeName();
+        // 获取对应的动态sql标签
         NodeHandler handler = nodeHandlers(nodeName);
         if (handler == null) {
           throw new BuilderException("Unknown element <" + nodeName + "> in SQL statement.");
         }
+        // 对各个动态sql标签进行处理
         handler.handleNode(child, contents);
         isDynamic = true;
       }
@@ -91,6 +95,7 @@ public class XMLScriptBuilder extends BaseBuilder {
   }
 
   NodeHandler nodeHandlers(String nodeName) {
+    // 使用Map来代替if语句，判断节点对应的动态sql类型，返回对应的处理类(注：这些处理类都是XMLScriptBuilder的内部类)
     Map<String, NodeHandler> map = new HashMap<String, NodeHandler>();
     map.put("trim", new TrimHandler());
     map.put("where", new WhereHandler());
@@ -108,6 +113,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     void handleNode(XNode nodeToHandle, List<SqlNode> targetContents);
   }
 
+  // <bind>标签处理类
   private class BindHandler implements NodeHandler {
     public BindHandler() {
       // Prevent Synthetic Access
@@ -122,6 +128,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <trim>标签处理类
   private class TrimHandler implements NodeHandler {
     public TrimHandler() {
       // Prevent Synthetic Access
@@ -140,6 +147,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <where>标签处理类
   private class WhereHandler implements NodeHandler {
     public WhereHandler() {
       // Prevent Synthetic Access
@@ -154,6 +162,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <set>标签处理类
   private class SetHandler implements NodeHandler {
     public SetHandler() {
       // Prevent Synthetic Access
@@ -168,6 +177,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <foreach>标签处理类
   private class ForEachHandler implements NodeHandler {
     public ForEachHandler() {
       // Prevent Synthetic Access
@@ -188,6 +198,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <if>标签处理类
   private class IfHandler implements NodeHandler {
     public IfHandler() {
       // Prevent Synthetic Access
@@ -195,14 +206,18 @@ public class XMLScriptBuilder extends BaseBuilder {
 
     @Override
     public void handleNode(XNode nodeToHandle, List<SqlNode> targetContents) {
+      // 标签内部可能还存在子标签，这里进行递归处理
       List<SqlNode> contents = parseDynamicTags(nodeToHandle);
       MixedSqlNode mixedSqlNode = new MixedSqlNode(contents);
+      // 获取<if>标签中的"test"属性值
       String test = nodeToHandle.getStringAttribute("test");
+      // 解析<if>标签值，通过ognl判断表达式的值，将其转换为
       IfSqlNode ifSqlNode = new IfSqlNode(mixedSqlNode, test);
       targetContents.add(ifSqlNode);
     }
   }
 
+  // <otherwise>标签处理类
   private class OtherwiseHandler implements NodeHandler {
     public OtherwiseHandler() {
       // Prevent Synthetic Access
@@ -216,6 +231,7 @@ public class XMLScriptBuilder extends BaseBuilder {
     }
   }
 
+  // <choose>标签处理类
   private class ChooseHandler implements NodeHandler {
     public ChooseHandler() {
       // Prevent Synthetic Access

@@ -53,7 +53,8 @@ public class XMLStatementBuilder extends BaseBuilder {
     this.requiredDatabaseId = databaseId;
   }
 
-  //解析语句(select|insert|update|delete)
+  // 解析语句(select|insert|update|delete)，解析的(select|insert|update|delete)节点中的属性通过MapperBuilderAssistant构建一个MappedStatement对象
+  // 然后这个MappedStatement对象放入Configuration中，待之后具体的语句执行时使用
 //<select
 //  id="selectPerson"
 //  parameterType="int"
@@ -123,7 +124,7 @@ public class XMLStatementBuilder extends BaseBuilder {
     processSelectKeyNodes(id, parameterTypeClass, langDriver);
 
     // Parse the SQL (pre: <selectKey> and <include> were parsed and removed)
-    //解析成SqlSource，一般是DynamicSqlSource
+    // 重点，通过LanguageDriver解析Sql，内部使用XMLScriptBuilder进行解析，解析成SqlSource，一般是DynamicSqlSource
     SqlSource sqlSource = langDriver.createSqlSource(configuration, context, parameterTypeClass);
     String resultSets = context.getStringAttribute("resultSets");
     //(仅对 insert 有用) 标记一个属性, MyBatis 会通过 getGeneratedKeys 或者通过 insert 语句的 selectKey 子元素设置它的值

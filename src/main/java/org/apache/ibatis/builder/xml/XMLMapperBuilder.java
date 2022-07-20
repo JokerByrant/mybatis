@@ -80,7 +80,7 @@ public class XMLMapperBuilder extends BaseBuilder {
   public void parse() {
     //如果没有加载过再加载，防止重复加载
     if (!configuration.isResourceLoaded(resource)) {
-      //配置mapper
+      //配置mapper. 通过XPathParser解析mapper节点, 返回一个XNode对象
       configurationElement(parser.evalNode("/mapper"));
       //标记一下，已经加载过了
       configuration.addLoadedResource(resource);
@@ -122,7 +122,7 @@ public class XMLMapperBuilder extends BaseBuilder {
       resultMapElements(context.evalNodes("/mapper/resultMap"));
       //6.配置sql(定义可重用的 SQL 代码段)
       sqlElement(context.evalNodes("/mapper/sql"));
-      //7.配置select|insert|update|delete TODO
+      //7.配置select|insert|update|delete. 解析mapper节点下的select|insert|update|delete节点, 返回XNode集合
       buildStatementFromContext(context.evalNodes("select|insert|update|delete"));
     } catch (Exception e) {
       throw new BuilderException("Error parsing Mapper XML. Cause: " + e, e);
@@ -140,6 +140,7 @@ public class XMLMapperBuilder extends BaseBuilder {
 
   //7.1构建语句
   private void buildStatementFromContext(List<XNode> list, String requiredDatabaseId) {
+    // 将解析过的select|insert|update|delete节点对应的XNode作为参数传入XMLStatementBuilder中, 构建一个XMLStatementBuilder对象, 用来解析select|insert|update|delete节点下的属性
     for (XNode context : list) {
       //构建所有语句,一个mapper下可以有很多select
       //语句比较复杂，核心都在这里面，所以调用XMLStatementBuilder
