@@ -347,6 +347,7 @@ public abstract class BaseExecutor implements Executor {
   }
 
   protected Connection getConnection(Log statementLog) throws SQLException {
+    // 如果是配置的数据源是UnpooledDataSource类型的(不使用连接池)，那么每次执行getConnection()都会创建一个新的connection
     Connection connection = transaction.getConnection();
     if (statementLog.isDebugEnabled()) {
       //如果需要打印Connection的日志，返回一个ConnectionLogger(代理模式, AOP思想)

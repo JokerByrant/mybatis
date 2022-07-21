@@ -15,21 +15,16 @@
  */
 package org.apache.ibatis.datasource.unpooled;
 
+import org.apache.ibatis.io.Resources;
+
+import javax.sql.DataSource;
 import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.DriverPropertyInfo;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.Enumeration;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
-import org.apache.ibatis.io.Resources;
 
 /**
  * @author Clinton Begin
@@ -188,6 +183,7 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(String username, String password) throws SQLException {
+    // 将配置的username和password封装成Properties
     Properties props = new Properties();
     if (driverProperties != null) {
       props.putAll(driverProperties);
@@ -202,9 +198,11 @@ public class UnpooledDataSource implements DataSource {
   }
 
   private Connection doGetConnection(Properties properties) throws SQLException {
+    // 初始化数据库驱动
     initializeDriver();
-    //属性的前缀是以“driver.”开 头的,它 是 通 过 DriverManager.getConnection(url,driverProperties)方法传递给数据库驱动
+    // 从DriverManager中获取连接，获取新的Connection对象
     Connection connection = DriverManager.getConnection(url, properties);
+    // 配置connection属性
     configureConnection(connection);
     return connection;
   }

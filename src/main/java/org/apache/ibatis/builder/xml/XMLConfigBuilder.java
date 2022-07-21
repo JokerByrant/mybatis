@@ -454,7 +454,7 @@ public class XMLConfigBuilder extends BaseBuilder {
     if (context != null) {
       String type = context.getStringAttribute("type");
       Properties props = context.getChildrenAsProperties();
-		//根据type="POOLED"解析返回适当的DataSourceFactory
+      // 根据type="POOLED"解析返回适当的DataSourceFactory
       DataSourceFactory factory = (DataSourceFactory) resolveClass(type).newInstance();
       factory.setProperties(props);
       return factory;

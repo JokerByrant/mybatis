@@ -15,22 +15,17 @@
  */
 package org.apache.ibatis.datasource.pooled;
 
-import java.io.PrintWriter;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Proxy;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import javax.sql.DataSource;
-
 import org.apache.ibatis.datasource.unpooled.UnpooledDataSource;
 import org.apache.ibatis.logging.Log;
 import org.apache.ibatis.logging.LogFactory;
+
+import javax.sql.DataSource;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Proxy;
+import java.sql.*;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * This is a simple, synchronous, thread-safe database connection pool.
@@ -339,6 +334,7 @@ public class PooledDataSource implements DataSource {
     return ("" + url + username + password).hashCode();
   }
 
+  // 当触发Connection.close()方法是，实际上是进到了这个方法中，将对应的Connection加入到空闲连接列表中
   protected void pushConnection(PooledConnection conn) throws SQLException {
 
     synchronized (state) {
@@ -393,10 +389,11 @@ public class PooledDataSource implements DataSource {
     //最外面是while死循环，如果一直拿不到connection，则不断尝试
     while (conn == null) {
       synchronized (state) {
+        // idleConnections中存放的是空闲的Connection，这里先从空闲列表取
         if (!state.idleConnections.isEmpty()) {
           //如果有空闲的连接的话
           // Pool has available connection
-          //删除空闲列表里第一个，返回
+          // 将空闲列表的第一个去除，并将其从列表移除
           conn = state.idleConnections.remove(0);
           if (log.isDebugEnabled()) {
             log.debug("Checked out connection " + conn.getRealHashCode() + " from pool.");
@@ -434,7 +431,7 @@ public class PooledDataSource implements DataSource {
                 log.debug("Claimed overdue connection " + conn.getRealHashCode() + ".");
               }
             } else {
-            	//如果checkout时间不够长，等待吧
+            	//如果checkout时间不够长(最老的连接无法释放)，必须等待
               // Must wait
               try {
                 if (!countedWait) {
@@ -465,6 +462,7 @@ public class PooledDataSource implements DataSource {
             //记录checkout时间
             conn.setCheckoutTimestamp(System.currentTimeMillis());
             conn.setLastUsedTimestamp(System.currentTimeMillis());
+            // 将拿到的connection放入activeConnections集合中(活动状态Connection)
             state.activeConnections.add(conn);
             state.requestCount++;
             state.accumulatedRequestTime += System.currentTimeMillis() - t;

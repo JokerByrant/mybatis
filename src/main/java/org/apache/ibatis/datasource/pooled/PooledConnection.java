@@ -15,13 +15,13 @@
  */
 package org.apache.ibatis.datasource.pooled;
 
+import org.apache.ibatis.reflection.ExceptionUtil;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.SQLException;
-
-import org.apache.ibatis.reflection.ExceptionUtil;
 
 /**
  * @author Clinton Begin
@@ -35,10 +35,11 @@ class PooledConnection implements InvocationHandler {
   private static final Class<?>[] IFACES = new Class<?>[] { Connection.class };
 
   private int hashCode = 0;
+  // 创建它的datasource引用
   private PooledDataSource dataSource;
   //真正的连接
   private Connection realConnection;
-  //代理的连接
+  // 代理的连接
   private Connection proxyConnection;
   private long checkoutTimestamp;
   private long createdTimestamp;
@@ -237,7 +238,7 @@ class PooledConnection implements InvocationHandler {
   @Override
   public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
     String methodName = method.getName();
-    //如果调用close的话，忽略它，反而将这个connection加入到池中
+    //如果调用close的话，将这个connection加入到池中
     if (CLOSE.hashCode() == methodName.hashCode() && CLOSE.equals(methodName)) {
       dataSource.pushConnection(this);
       return null;
